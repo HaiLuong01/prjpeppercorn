@@ -40,6 +40,11 @@ class Pad:
 class Bank:
     die : str
     bank: str
+    pins: set = None  # None means all pins; otherwise a set like {"A5","A6","B0"}
+    
+    def __post_init__(self):
+        if self.pins is not None:
+            self.pins = frozenset(self.pins)
 
 @dataclass
 class TimingDelay:
@@ -166,6 +171,10 @@ class Chip:
             for bank in banks:
                 for p in ["A","B"]:
                     for num in range(9):
+                        pin_id = f"{p}{num}"
+                        # Skip if this bank only covers specific pins and this isn't one
+                        if bank.pins is not None and pin_id not in bank.pins:
+                            continue
                         d = self.dies[bank.die]
                         ddr = d.ddr_i[bank.bank]
                         loc = d.io_pad_names[bank.bank][p][num]
@@ -205,7 +214,7 @@ CCGM1_DEVICES = {
                         "EB" : [ Bank("1B", "N2") ],
                         "NA" : [ Bank("1A", "E1"), Bank("1B", "E1") ],
                         "NB" : [ Bank("1A", "E2") ],
-                        "WA" : [ Bank("1A", "S3"), Bank("1B", "S3") ],
+                        "WA" : [ Bank("1A", "S3", {"A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "B0", "B1", "B2", "B4", "B5", "B6", "B7", "B8"}), Bank("1B", "S3", {"B3"}) ],
                         "WB" : [ Bank("1A", "N1"), Bank("1B", "S1") ],
                         "WC" : [ Bank("1A", "S2") ],
                         "SA" : [ Bank("1A", "W1") ],
