@@ -25,6 +25,11 @@ from timing import decompress_timing
 
 DATABASE_VERSION = 1.12
 
+# WA bank pin whitelists for CCGM1A2:
+# All A0..A8 and B0..B8 are on die 1A except B3, which is assigned to die 1B.
+WA_BANK_1A_PINS = {f"A{i}" for i in range(9)} | ({f"B{i}" for i in range(9)} - {"B3"})
+WA_BANK_1B_PINS = {"B3"}
+
 @dataclass(eq=True, order=True)
 class Pad:
     x : int
@@ -219,7 +224,7 @@ CCGM1_DEVICES = {
                         "EB" : [ Bank("1B", "N2") ],
                         "NA" : [ Bank("1A", "E1"), Bank("1B", "E1") ],
                         "NB" : [ Bank("1A", "E2") ],
-                        "WA" : [ Bank("1A", "S3", {"A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "B0", "B1", "B2", "B4", "B5", "B6", "B7", "B8"}), Bank("1B", "S3", {"B3"}) ],
+                        "WA" : [ Bank("1A", "S3", WA_BANK_1A_PINS), Bank("1B", "S3", WA_BANK_1B_PINS) ],
                         "WB" : [ Bank("1A", "N1"), Bank("1B", "S1") ],
                         "WC" : [ Bank("1A", "S2") ],
                         "SA" : [ Bank("1A", "W1") ],
