@@ -20,7 +20,7 @@ import die
 import os
 from die import Die, Location, Connection
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, FrozenSet, Optional
 from timing import decompress_timing
 
 DATABASE_VERSION = 1.12
@@ -40,10 +40,15 @@ class Pad:
 class Bank:
     die : str
     bank: str
-    pins: set = None  # None means all pins; otherwise a set like {"A5","A6","B0"}
+    pins: Optional[FrozenSet[str]] = None  # None means all pins; otherwise a set like {"A5","A6","B0"}
     
     def __post_init__(self):
-        if self.pins is not None:
+        if self.pins is None:
+            return
+        if isinstance(self.pins, str):
+            # Treat a single string as a single pin name, not an iterable of characters
+            self.pins = frozenset({self.pins})
+        else:
             self.pins = frozenset(self.pins)
 
 @dataclass
